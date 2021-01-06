@@ -1,0 +1,76 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <link rel="stylesheet" href="/styles/common.css">
+</head>
+<body>
+    <div th:if="${isAuth}">
+        <table>
+            <tr>
+                <td>You logged as: <span th:text="${userName}"/></td>
+                <td style="max-width: 10px;width: 10px"></td>
+                <td><a href="/secured/anquette">My anquette</a></td>
+                <td style="max-width: 10px;width: 10px"></td>
+                <td><a href="/user_logout">Logout</a></td>
+            </tr>
+        </table>
+
+    </div>
+    <div th:if="${!isAuth}"><a href="/login">Login</a></div>
+    <div th:if="${!isAuth}"><a href="/register">Register</a></div>
+    <hr/>
+    <div>
+        <form action="#" th:action="@{/index}" th:object="${searchForm}" method='GET'>
+            <table>
+                <tr>
+                    <td><input type='text' th:field="*{searchText}"  /></td>
+                    <td><input name="submit" type="submit" value="Find" /></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div th:if="${foundedUsers.isEmpty()}">Users not founded</div>
+    <div th:if="${!foundedUsers.isEmpty()}">
+        Founded <span th:text="${foundedUsers.recordCount}"> users</span>
+        <table>
+            <thead>
+                <tr>
+                    <th>Is my friend</th>
+                    <th>Email</th>
+                    <th>Last name</th>
+                    <th>First name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>City</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="foundedUser: ${foundedUsers.records}">
+                    <td>
+                        &nbsp;<span th:if="${isAuth && foundedUser.addedToFriends}">+</span>
+                    </td>
+                    <td>
+                        <a th:href="@{'/view/' + ${foundedUser.id}}" >
+                            <span th:text="${foundedUser.email}" />
+                        </a>
+                    </td>
+                    <td><span th:text="${foundedUser.lastName}" /></td>
+                    <td><span th:text="${foundedUser.firstName}" /></td>
+                    <td><span th:text="${foundedUser.age}" /></td>
+                    <td><span th:text="${foundedUser.gender.name()}" /></td>
+                    <td><span th:if="${foundedUser.city != null}" th:text="${foundedUser.city.name}" /></td>
+                    <td>
+                        &nbsp;
+                        <div th:if="${isAuth && (authUser.id != foundedUser.id) && foundedUser.addedToFriends}">
+                            <a th:href="@{'/removeFromFriends/' + ${foundedUser.id}}">remove from friends</a>
+                        </div>
+                        <div th:if="${isAuth && (authUser.id != foundedUser.id) && !foundedUser.addedToFriends}">
+                            <a th:href="@{'/addToFriends/' + ${foundedUser.id}}">add to friends</a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

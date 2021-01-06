@@ -1,0 +1,72 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <link rel="stylesheet" href="/styles/common.css">
+</head>
+<body>
+    <div><a href="/">Home</a></div>
+    <div th:if="${isAuth}">
+        <table>
+            <tr>
+                <td>You logged as: <span th:text="${userName}"/></td>
+                <td style="max-width: 10px;width: 10px"></td>
+                <td><a href="/secured/anquette">My anquette</a></td>
+                <td style="max-width: 10px;width: 10px"></td>
+                <td><a href="/user_logout">Logout</a></td>
+            </tr>
+        </table>
+
+    </div>
+    <div th:if="${!isAuth}"><a href="/login">Login</a></div>
+    <div th:if="${!isAuth}"><a href="/register">Register</a></div>
+    <hr/>
+    <table>
+        <tr>
+            <th>Email</th>
+            <td><span th:text="${viewUser.email}"/></td>
+        </tr>
+        <tr>
+            <th>Last name</th>
+            <td><span th:text="${viewUser.lastName}"/></td>
+        </tr>
+        <tr>
+            <th>First name</th>
+            <td><span th:text="${viewUser.firstName}"/></td>
+        </tr>
+        <tr>
+            <th>Age</th>
+            <td><span th:text="${viewUser.age}"/></td>
+        </tr>
+        <tr>
+            <th>Gender</th>
+            <td><span th:text="${viewUser.gender.name()}"/></td>
+        </tr>
+        <tr>
+            <th>City</th>
+            <td><span th:if="${viewUser.city != null}" th:text="${viewUser.city.name}"/></td>
+        </tr>
+        <tr>
+            <th>Interests</th>
+            <td>
+                <div th:each="interest: ${viewUser.interests}"><span style="margin-right: 5px" th:text="${interest.name}"/></div>
+            </td>
+        </tr>
+        <tr>
+            <th>Friends</th>
+            <td>
+                <table>
+                    <tr>
+                        <th>Email</th>
+                        <th>Last name</th>
+                        <th>First name</th>
+                    </tr>
+                    <tr th:each="friend: ${viewUser.friends}">
+                        <td><span th:text="${friend.email}"/></td>
+                        <td><span th:text="${friend.lastName}"/></td>
+                        <td><span th:text="${friend.firstName}"/></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

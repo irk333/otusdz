@@ -1,0 +1,53 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" href="/styles/common.css">
+</head>
+<body>
+    <div>
+        <a href="/index">Home</a>
+    </div>
+    <hr/>
+    <div>Anquette:</div>
+    <form action="#" th:action="@{/secured/updateuser}" th:object="${anquetteForm}" method='POST'>
+        <table>
+            <tr>
+                <th>Email:</th>
+                <td><p th:text="${anquetteForm.email}"></p></td>
+            </tr>
+            <tr>
+                <th>Last name:</th>
+                <td><input type='text' th:field="*{lastName}"  /></td>
+            </tr>
+            <tr>
+                <th>First name:</th>
+                <td><input type='text' th:field="*{firstName}"  /></td>
+            </tr>
+            <tr>
+                <th>Age:</th>
+                <td><input type='text' th:field="*{age}"  /></td>
+            </tr>
+            <tr>
+                <th>Gender:</th>
+                <td><select th:field="*{gender}">
+                        <option value="1">male</option>
+                        <option value="2">female</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th>City:</th>
+                <td><input type='text' th:field="*{cityName}"  /></td>
+            </tr>
+            <tr>
+                <th>Interests:</th>
+                <td><input type='text' th:field="*{interestsAsString}"  /></td>
+            </tr>
+            <tr>
+                <td><input name="submit" type="submit" value="Update" /></td>
+            </tr>
+        </table>
+    </form>
+    <div>Friends:</div>
+
+</body>
+</html>
