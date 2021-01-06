@@ -100,7 +100,7 @@ public class UserService {
             .findByNameExact(cityName)
             .orElseGet(() -> {
                 long cityId = cityDao.insert(cityNamePrepared);
-                return cityDao.findById(cityId).orElseThrow();
+                return cityDao.findById(cityId).get();
             });
 
         // interests
