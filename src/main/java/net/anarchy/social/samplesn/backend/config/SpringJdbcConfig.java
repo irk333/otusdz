@@ -55,15 +55,7 @@ public class SpringJdbcConfig implements WebMvcConfigurer {
         liquibase.setChangeLog("classpath:sql/changelog.xml");
         return liquibase;
     }
-/*
-    public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/index").setViewName("index");
-        registry.addViewController("/").setViewName("index");
-        registry.addViewController("/register.html").setViewName("register");
-        registry.addViewController("/login.html").setViewName("login");
-        registry.addViewController("/secured/anquette.html").setViewName("anquette");
-    }
-*/
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
