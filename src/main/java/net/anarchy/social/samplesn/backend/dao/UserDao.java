@@ -5,6 +5,7 @@ import net.anarchy.social.samplesn.backend.entity.Interest;
 import net.anarchy.social.samplesn.backend.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jdbc.repository.support.SimpleJdbcRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -71,6 +72,16 @@ public class UserDao {
         return ((Number) keyHolder.getKey()).longValue();
     }
 
+    public List<User> findFriends(long userId) {
+        List<User> lst = jdbcTemplate.query("select * from v_users_city u inner join users_friends f on (f.friend_id = u.id) where f.user_id = ? ", new UserRowMapper(), userId);
+        return lst;
+    }
+
+    public List<User> findFriendOfUsers(long userId) {
+        List<User> lst = jdbcTemplate.query("select * from v_users_city u inner join users_friends f on (f.user_id = u.id) where f.friend_id = ? ", new UserRowMapper(), userId);
+        return lst;
+    }
+
     public List<Long> findFriendIds(long userId, Set<Long> ids) {
         if (ids.size() == 0) {
             return new ArrayList<>();
@@ -83,6 +94,19 @@ public class UserDao {
         return resIds;
     }
 
+    public List<Long> findFriendOfUserIds(long userId, Set<Long> ids) {
+        if (ids.size() == 0) {
+            return new ArrayList<>();
+        }
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("friendIds", ids );
+        parameters.addValue("userId", userId);
+
+        List<Long> resIds = namedParameterJdbcTemplate.query("select user_id from users_friends where friend_id = :userId and user_id in (:friendIds)", parameters,new LongRowMapper("user_id") );
+        return resIds;
+    }
+
+
     public List<Interest> loadInterests(long userId) {
         List<Interest> lst = jdbcTemplate.query("select i.* from users_interest ui inner join interest i on (i.id = ui.interest_id) where ui.user_id = ?", new InterestRowMapper(), userId);
         return lst;
@@ -93,12 +117,17 @@ public class UserDao {
         return lst;
     }
 
+    public List<User> loadFriendsOf(long userId) {
+        List<User> lst = jdbcTemplate.query("select i.*, c.name as cityName from users_friends ui inner join users i on (i.id = ui.user_id) left outer join city c on (c.id = i.city_id) where ui.friend_id = ?", new UserRowMapper(), userId);
+        return lst;
+    }
+
     public User update(@NonNull User user) throws SocialNetworkException {
         jdbcTemplate.update("update users set lastname = ?, firstname = ?, age = ?, gender = ?, city_id = ? where id = ?", user.getLastName(), user.getFirstName(), user.getAge(), user.getGender().getId(), (user.getCity() == null)?null:user.getCity().getId(), user.getId() );
 
         Optional<User> updatedUser = findById(user.getId());
         if (!updatedUser.isPresent()) {
-            throw new SocialNetworkException("User " + user.getId() + " not exists");
+            throw new SocialNetworkException(HttpStatus.NOT_FOUND, "User " + user.getId() + " not exists");
         }
         return updatedUser.get();
     }

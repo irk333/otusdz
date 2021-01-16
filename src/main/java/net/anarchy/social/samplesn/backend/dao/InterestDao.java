@@ -3,6 +3,7 @@ package net.anarchy.social.samplesn.backend.dao;
 import net.anarchy.social.samplesn.backend.SocialNetworkException;
 import net.anarchy.social.samplesn.backend.entity.Interest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -56,7 +57,7 @@ public class InterestDao {
         jdbcTemplate.update("update interest set name = ? where id = ?", newName, id);
         List<Interest> lst = jdbcTemplate.query("select * from interest where id = ?", new InterestRowMapper(), id);
         if (lst.size() == 0) {
-            throw new SocialNetworkException("interest " + id + " not exists");
+            throw new SocialNetworkException(HttpStatus.NOT_FOUND, "interest " + id + " not exists");
         }
         return lst.get(0);
     }

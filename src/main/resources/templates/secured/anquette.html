@@ -1,6 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <link rel="stylesheet" href="/styles/common.css">
+
 </head>
 <body>
     <div>
@@ -40,14 +40,43 @@
             </tr>
             <tr>
                 <th>Interests:</th>
-                <td><input type='text' th:field="*{interestsAsString}"  /></td>
+                <td><input type='text' th:field="*{interestsAsString}" /> (comma delimited)</td>
             </tr>
             <tr>
                 <td><input name="submit" type="submit" value="Update" /></td>
             </tr>
         </table>
     </form>
-    <div>Friends:</div>
+    <hr/>
+    <div>My friends:</div>
+    <table>
+        <tr>
+            <th>Email</th>
+            <th>Lastname</th>
+            <th>Firstname</th>
+            <th>actions</th>
+        </tr>
+        <tr th:each="friend : ${myFriends}">
+            <td><a th:href="@{'/view/' + ${friend.id}}"><span th:text="${friend.email}"/></a></td>
+            <td><span th:text="${friend.lastName}"/></td>
+            <td><span th:text="${friend.firstName}"/></td>
+            <td><a th:href="@{'/removeFromFriendsAnquette/' + ${friend.id}}">remove from friends</a></td>
+        </tr>
+    </table>
 
+    <hr/>
+    <div>I am a friend of:</div>
+    <table>
+        <tr>
+            <th>Email</th>
+            <th>Lastname</th>
+            <th>Firstname</th>
+        </tr>
+        <tr th:each="friend : ${friendsOf}">
+            <td><a th:href="@{'/view/' + ${friend.id}}"><span th:text="${friend.email}"/></a></td>
+            <td><span th:text="${friend.lastName}"/></td>
+            <td><span th:text="${friend.firstName}"/></td>
+        </tr>
+    </table>
 </body>
 </html>

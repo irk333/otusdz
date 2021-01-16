@@ -1,6 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
 <head>
-    <link rel="stylesheet" href="/styles/common.css">
+
 </head>
 <body>
     <div><a href="/">Home</a></div>
@@ -60,7 +60,24 @@
                         <th>First name</th>
                     </tr>
                     <tr th:each="friend: ${viewUser.friends}">
-                        <td><span th:text="${friend.email}"/></td>
+                        <td><a th:href="@{'/view/' + ${friend.id}}"><span th:text="${friend.email}"/></a></td>
+                        <td><span th:text="${friend.lastName}"/></td>
+                        <td><span th:text="${friend.firstName}"/></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <th>Friend of</th>
+            <td>
+                <table>
+                    <tr>
+                        <th>Email</th>
+                        <th>Last name</th>
+                        <th>First name</th>
+                    </tr>
+                    <tr th:each="friend: ${viewUser.friendOf}">
+                        <td><a th:href="@{'/view/' + ${friend.id}}"><span th:text="${friend.email}"/></a></td>
                         <td><span th:text="${friend.lastName}"/></td>
                         <td><span th:text="${friend.firstName}"/></td>
                     </tr>

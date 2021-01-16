@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="init_scheme" author="bia">
+        <sql endDelimiter=";" splitStatements="true" stripComments="true">
+            <![CDATA[
+create view v_users_city as
+select u.*, c.name as cityName
+from users u left outer join city c on (c.id = u.city_id);
+
+ALTER TABLE users_interest DROP FOREIGN KEY fk_interest;
+ALTER TABLE users_interest DROP FOREIGN KEY fk_user;
+drop index idx_users_interest_rev on users_interest;
+ALTER TABLE users_friends DROP FOREIGN KEY fk_user1;
+ALTER TABLE users_friends DROP FOREIGN KEY fk_friend1;
+drop index idx_users_friends_rev on users_friends;
+drop index idx_users_email on users;
+drop index idx_users_lastname on users;
+drop index idx_users_firstname on users;
+ALTER TABLE users DROP FOREIGN KEY fk_city;
+drop index idx_users_city on users;
+drop index idx_city_name on city;
+drop index idx_interest_name on interest;
+            ]]>
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

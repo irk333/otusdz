@@ -1,6 +1,5 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
 <head>
-    <link rel="stylesheet" href="/styles/common.css">
 </head>
 <body>
     <div th:if="${isAuth}">
@@ -33,8 +32,9 @@
         Founded <span th:text="${foundedUsers.recordCount}"> users</span>
         <table>
             <thead>
-                <tr>
+                <tr valign="top">
                     <th>Is my friend</th>
+                    <th>I am a friend of</th>
                     <th>Email</th>
                     <th>Last name</th>
                     <th>First name</th>
@@ -45,9 +45,12 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="foundedUser: ${foundedUsers.records}">
-                    <td>
+                <tr valign="top" th:each="foundedUser: ${foundedUsers.records}">
+                    <td style="alignment: center">
                         &nbsp;<span th:if="${isAuth && foundedUser.addedToFriends}">+</span>
+                    </td>
+                    <td style="alignment: center">
+                        &nbsp;<span th:if="${isAuth && foundedUser.iAmAFriendOf}">+</span>
                     </td>
                     <td>
                         <a th:href="@{'/view/' + ${foundedUser.id}}" >

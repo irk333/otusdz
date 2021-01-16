@@ -9,6 +9,7 @@ import net.anarchy.social.samplesn.backend.entity.City;
 import net.anarchy.social.samplesn.backend.entity.Interest;
 import net.anarchy.social.samplesn.backend.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,10 @@ public class UserService {
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
 
-    public void addToFriend(User user, long friendId) {
+    public void addToFriend(User user, long friendId) throws SocialNetworkException {
+        if (user.getId() == friendId) {
+            throw new SocialNetworkException(HttpStatus.NOT_ACCEPTABLE, "You cannot become a friend of youself");
+        }
         userDao.insertFriend(user.getId(),friendId);
     }
 
@@ -42,7 +46,7 @@ public class UserService {
     }
 
     public User getByEmail(String email, boolean loadInterests, boolean loadFriends) throws SocialNetworkException {
-        User auser = userDao.findByEmail(email).orElseThrow(() -> new SocialNetworkException("user not exists"));
+        User auser = userDao.findByEmail(email).orElseThrow(() -> new SocialNetworkException( HttpStatus.NOT_FOUND, "user not exists"));
         if (loadInterests) {
             auser.setInterests(userDao.loadInterests(auser.getId()));
         }
@@ -53,12 +57,13 @@ public class UserService {
     }
 
     public User getById(long id, boolean loadInterests, boolean loadFriends) throws SocialNetworkException {
-        User auser = userDao.findById(id).orElseThrow(() -> new SocialNetworkException("user not exists"));
+        User auser = userDao.findById(id).orElseThrow(() -> new SocialNetworkException(HttpStatus.NOT_FOUND, "user not exists"));
         if (loadInterests) {
             auser.setInterests(userDao.loadInterests(auser.getId()));
         }
         if (loadFriends) {
             auser.setFriends(userDao.loadFriends(auser.getId()));
+            auser.setFriendOf(userDao.loadFriendsOf(auser.getId()));
         }
         return auser;
     }
@@ -66,7 +71,7 @@ public class UserService {
     @Transactional
     public User register(@NonNull String email, @NonNull String password) throws SocialNetworkException {
         if (userDao.findByEmail(email).isPresent() ) {
-            throw new SocialNetworkException("User already registered");
+            throw new SocialNetworkException(HttpStatus.INTERNAL_SERVER_ERROR, "User already registered");
         }
 
         User newUser = new User();
@@ -85,14 +90,14 @@ public class UserService {
     @Transactional
     public User update(long id, @NonNull String lastName, @NonNull String firstName, int age, int gender, String cityName, Set<String> interests)  throws SocialNetworkException {
         if (age < 5 || age > 120) {
-            throw new SocialNetworkException("invalid age");
+            throw new SocialNetworkException(HttpStatus.NOT_ACCEPTABLE, "invalid age");
         }
         User.Gender uGender = User.Gender.findById(gender);
         if (uGender == null) {
-            throw new SocialNetworkException("invalid gender");
+            throw new SocialNetworkException(HttpStatus.NOT_ACCEPTABLE, "invalid gender");
         }
 
-        User aUser = userDao.findById(id).orElseThrow(() -> new SocialNetworkException("User not exists"));
+        User aUser = userDao.findById(id).orElseThrow(() -> new SocialNetworkException(HttpStatus.NOT_FOUND, "User not exists"));
 
         // city
         final String cityNamePrepared = cityName.trim();
@@ -131,7 +136,7 @@ public class UserService {
         try {
             userDao.insertFriend(userId, friendUserId);
         } catch (Exception ex) {
-            throw new SocialNetworkException("friend does not added");
+            throw new SocialNetworkException(HttpStatus.NOT_FOUND, "friend does not added");
         }
     }
 }

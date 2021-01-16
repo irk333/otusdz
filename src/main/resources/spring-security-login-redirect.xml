@@ -30,7 +30,7 @@
         <security:intercept-url pattern="/secured/**" access="isAuthenticated()"/>
         <security:intercept-url pattern="/**" access="permitAll"/>
 
-        <security:form-login login-page="/login.html" login-processing-url="/dologin"
+        <security:form-login login-page="/login" login-processing-url="/dologin"
                              authentication-failure-url="/login?error=loginError"
                              default-target-url="/secured/anquette"/>
         <security:csrf disabled="true"/>

@@ -1,6 +1,6 @@
-<html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
 <head>
-    <link rel="stylesheet" href="/styles/common.css">
+
 </head>
 <body>
     <div>
@@ -8,6 +8,9 @@
     </div>
     <hr/>
     <h1>Login</h1>
+    <div>
+        <span th:text="${errorMessage}" />
+    </div>
     <form name="frmLogin" action="/dologin" method='POST'>
         <table>
             <tr>

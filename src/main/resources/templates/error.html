@@ -1,0 +1,8 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+</head>
+<body>
+Error: <span th:text='${#request.getAttribute("javax.servlet.error.status_code")}' />&nbsp;<span th:text='${#request.getAttribute("javax.servlet.error.message")}' />
+
+</body>
+</html>

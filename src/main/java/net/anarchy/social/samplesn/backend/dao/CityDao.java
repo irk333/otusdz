@@ -3,6 +3,7 @@ package net.anarchy.social.samplesn.backend.dao;
 import net.anarchy.social.samplesn.backend.SocialNetworkException;
 import net.anarchy.social.samplesn.backend.entity.City;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -49,7 +50,7 @@ public class CityDao {
         jdbcTemplate.update("update city set name = ? where id = ?", newName, id);
         List<City> lst = jdbcTemplate.query("select * from city where id = ?", new CityRowMapper(), id);
         if (lst.size() == 0) {
-            throw new SocialNetworkException("city " + id + " not exists");
+            throw new SocialNetworkException(HttpStatus.NOT_FOUND, "city " + id + " not exists");
         }
         return lst.get(0);
     }

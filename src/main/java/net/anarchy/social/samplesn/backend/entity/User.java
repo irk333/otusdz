@@ -93,6 +93,22 @@ public class User {
         this.addedToFriends = addedToFriends;
     }
 
+    public Boolean getiAmAFriendOf() {
+        return iAmAFriendOf;
+    }
+
+    public void setiAmAFriendOf(Boolean iAmAFriendOf) {
+        this.iAmAFriendOf = iAmAFriendOf;
+    }
+
+    public List<User> getFriendOf() {
+        return friendOf;
+    }
+
+    public void setFriendOf(List<User> friendOf) {
+        this.friendOf = friendOf;
+    }
+
     public static enum Gender {
         MALE(1),
         FEMALE(2);
@@ -127,5 +143,7 @@ public class User {
     private City city;
     private List<Interest> interests = new ArrayList<>();
     private List<User> friends = new ArrayList<>();
+    private List<User> friendOf = new ArrayList<>();
     private Boolean addedToFriends;
+    private Boolean iAmAFriendOf;
 }

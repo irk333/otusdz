@@ -10,6 +10,7 @@ import net.anarchy.social.samplesn.frontend.form.AnquetteForm;
 import net.anarchy.social.samplesn.frontend.form.RegisterForm;
 import net.anarchy.social.samplesn.frontend.form.SearchForm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,36 +40,51 @@ public class MainController {
     @Autowired
     UserDao userDao;
 
+    @GetMapping("/error")
+    public String error(Model model, HttpServletRequest req, HttpServletResponse resp) {
+        return "error";
+    }
+
     @GetMapping("/addToFriends/{friendId}")
     public String addToFriends(@PathVariable Long friendId)  throws SocialNetworkException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName();
         if (isAuthenticated(auth)) {
-            User auser = userDao.findByEmail(userName).orElseThrow(() -> new SocialNetworkException("user not found"));
+            User auser = userDao.findByEmail(userName).orElseThrow(() -> new SocialNetworkException(HttpStatus.NOT_FOUND,"user not found"));
             if (friendId == auser.getId()) {
-                throw new SocialNetworkException("you cannot add youself to friends");
+                throw new SocialNetworkException(HttpStatus.INTERNAL_SERVER_ERROR, "you cannot add youself to friends");
             }
             userService.addToFriend(auser,friendId);
         } else {
-            throw new SocialNetworkException("user is not authenticated");
+            throw new SocialNetworkException(HttpStatus.FORBIDDEN, "user is not authenticated");
         }
         return "redirect:/index";
     }
 
     @GetMapping("/removeFromFriends/{friendId}")
     public String removeFromFriends(@PathVariable Long friendId)  throws SocialNetworkException {
+        internalRemoveFromFriends(friendId);
+        return "redirect:/index";
+    }
+
+    @GetMapping("/removeFromFriendsAnquette/{friendId}")
+    public String removeFromFriendsAnquette(@PathVariable Long friendId)  throws SocialNetworkException {
+        internalRemoveFromFriends(friendId);
+        return "redirect:/secured/anquette";
+    }
+
+    private void internalRemoveFromFriends(long friendId) throws SocialNetworkException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName();
         if (isAuthenticated(auth)) {
-            User auser = userDao.findByEmail(userName).orElseThrow(() -> new SocialNetworkException("user not found"));
+            User auser = userDao.findByEmail(userName).orElseThrow(() -> new SocialNetworkException(HttpStatus.NOT_FOUND,"user not found"));
             if (friendId == auser.getId()) {
-                throw new SocialNetworkException("you cannot remove youself from friends");
+                throw new SocialNetworkException( HttpStatus.INTERNAL_SERVER_ERROR, "you cannot remove youself from friends");
             }
             userService.removeFromFriends(auser,friendId);
         } else {
-            throw new SocialNetworkException("user is not authenticated");
+            throw new SocialNetworkException(HttpStatus.FORBIDDEN, "user is not authenticated");
         }
-        return "redirect:/index";
     }
 
     @GetMapping({"/index","/"})
@@ -81,9 +100,19 @@ public class MainController {
 
         SearchResult<User> res = searchService.find(searchForm.getSearchText(),searchForm.getPageNo(), PAGE_SIZE);
         if (isAuthenticated(auth)) {
-            User auser = userDao.findByEmail(userName).orElseThrow(() -> new SocialNetworkException("user not found"));
-            final List<Long> fids = userDao.findFriendIds(auser.getId(), res.getRecords().stream().map(u -> u.getId()).collect(Collectors.toSet()));
-            res.getRecords().forEach(u -> u.setAddedToFriends( fids.contains(u.getId()) ));
+            User auser = userDao.findByEmail(userName).orElseThrow(() -> new SocialNetworkException(HttpStatus.NOT_FOUND,"user not found"));
+
+            {
+                // mark my friends in founded users
+                final List<Long> fids = userDao.findFriendIds(auser.getId(), res.getRecords().stream().map(u -> u.getId()).collect(Collectors.toSet()));
+                res.getRecords().forEach(u -> u.setAddedToFriends(fids.contains(u.getId())));
+            }
+
+            {
+                // mark friend-of  in founded users
+                final List<Long> fids = userDao.findFriendOfUserIds(auser.getId(), res.getRecords().stream().map(u -> u.getId()).collect(Collectors.toSet()));
+                res.getRecords().forEach(u -> u.setiAmAFriendOf(fids.contains(u.getId())));
+            }
 
             model.addAttribute("authUser", auser);
         }
@@ -113,6 +142,9 @@ public class MainController {
         AnquetteForm frm = new AnquetteForm();
         frm.initalize(auser);
         model.addAttribute("anquetteForm", frm);
+
+        model.addAttribute("myFriends",  userDao.findFriends(auser.getId()));
+        model.addAttribute("friendsOf", userDao.findFriendOfUsers(auser.getId()));
         return "secured/anquette";
     }
 
@@ -134,8 +166,12 @@ public class MainController {
     }
 
     @GetMapping("/login")
-    public String login(Model model) {
+    public String login(Model model, HttpServletRequest req) {
         model.addAttribute("isAuth", isAuthenticated());
+        String errorCode = req.getParameter("error");
+        if ("loginError".equals(errorCode)) {
+            model.addAttribute("errorMessage", "Invalid email or password");
+        }
         return "login";
     }
 
